@@ -16,6 +16,11 @@ The diagram shows the API Gateway as a single entry point, independent core serv
 
 ## Microservices
 
+- API Gateway - works on 9000 port
+- Flight Service - works on 8090 port
+- Booking Service - works on 8080
+- Config Server - wokrs on 8761 port
+  
 ### Flight Service
 - Handles all flight related operations such as adding airlines, adding flights, and searching flights.  
 - Implemented using Reactive WebFlux and MongoDB with database name `flight_db`.  
@@ -39,6 +44,7 @@ Email sending is asynchronous and decoupled from the booking flow.
 - Eureka Server for service discovery
 - Config Server for centralized configuration management
 - Apache Kafka as a message broker for email notifications
+- Proper Validations, Exception Handling has been implemented in each service
 
 ---
 
@@ -60,5 +66,3 @@ Email sending is asynchronous and decoupled from the booking flow.
 
 ---
 
-## Conclusion
-This project demonstrates a reactive microservices based flight booking system built using Spring WebFlux with a strong focus on scalability, fault tolerance, asynchronous communication, and high code quality.
