@@ -1,7 +1,7 @@
 name: SonarQube
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -30,42 +30,24 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Analyze ApiGateway
-        env: { SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} }
-        run: |
-          cd ApiGateway
-          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.projectKey=kanchanraiii_FlightBookingSystemMicroservice \
-            -Dsonar.host.url=https://sonarcloud.io
+      - name: Build & test ApiGateway
+        run: mvn -B test -f ApiGateway/pom.xml
 
-      - name: Analyze BookingService
-        env: { SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} }
-        run: |
-          cd BookingService
-          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.projectKey=kanchanraiii_FlightBookingSystemMicroservice \
-            -Dsonar.host.url=https://sonarcloud.io
+      - name: Build & test BookingService
+        run: mvn -B test -f BookingService/pom.xml
 
-      - name: Analyze FlightService
-        env: { SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} }
-        run: |
-          cd FlightService
-          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.projectKey=kanchanraiii_FlightBookingSystemMicroservice \
-            -Dsonar.host.url=https://sonarcloud.io
+      - name: Build & test FlightService
+        run: mvn -B test -f FlightService/pom.xml
 
-      - name: Analyze ConfigServer
-        env: { SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} }
-        run: |
-          cd ConfigServerFlightBooking
-          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.projectKey=kanchanraiii_FlightBookingSystemMicroservice \
-            -Dsonar.host.url=https://sonarcloud.io
+      - name: Build & test ConfigServer
+        run: mvn -B test -f ConfigServerFlightBooking/pom.xml
 
-      - name: Analyze Eureka
-        env: { SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} }
-        run: |
-          cd FlightBookingEurekaServer
-          mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.projectKey=kanchanraiii_FlightBookingSystemMicroservice \
-            -Dsonar.host.url=https://sonarcloud.io
+      - name: Build & test Eureka
+        run: mvn -B test -f FlightBookingEurekaServer/pom.xml
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: .

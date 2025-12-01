@@ -148,6 +148,13 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <reports>
+                                <xml>true</xml>
+                                <csv>false</csv>
+                                <html>true</html>
+                            </reports>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
