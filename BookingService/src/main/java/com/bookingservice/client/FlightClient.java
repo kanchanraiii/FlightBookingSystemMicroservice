@@ -2,8 +2,8 @@ package com.bookingservice.client;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import com.bookingservice.exceptions.ServiceUnavailableException;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
@@ -36,7 +36,9 @@ public class FlightClient {
                 .next()
                 .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
                 .onErrorResume(ex ->
-                        Mono.error(new ServiceUnavailableException("FlightService unavailable")));
+                        Mono.error(new ResponseStatusException(
+                                HttpStatus.SERVICE_UNAVAILABLE,
+                                "FlightService unavailable", ex)));
     }
 
     public Mono<Void> reserveSeats(String flightId, int seats) {
@@ -46,7 +48,9 @@ public class FlightClient {
                 .bodyToMono(Void.class)
                 .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))
                 .onErrorResume(ex -> Mono.error(
-                        new ServiceUnavailableException("FlightService unavailable")));
+                        new ResponseStatusException(
+                                HttpStatus.SERVICE_UNAVAILABLE,
+                                "FlightService unavailable", ex)));
     }
 
     public Mono<Void> releaseSeats(String flightId, int seats) {

@@ -8,7 +8,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -60,17 +62,19 @@ public class GlobalErrorHandler {
         return Mono.just(Map.of(ERROR_MESSAGE, ex.getMessage()));
     }
 
-    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
-    @ExceptionHandler(ServiceUnavailableException.class)
-    public Mono<Map<String, String>> handleServiceUnavailable(ServiceUnavailableException ex) {
-        return Mono.just(Map.of(ERROR_MESSAGE, ex.getMessage()));
-    }
-
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public Mono<Map<String, String>> handleInvalidJson(HttpMessageNotReadableException ex) {
         String message = messageFromCause(ex.getCause());
         return Mono.just(Map.of(ERROR_MESSAGE, message));
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public Mono<ResponseEntity<Map<String, String>>> handleResponseStatus(ResponseStatusException ex) {
+        HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
+        HttpStatus resolved = status != null ? status : HttpStatus.INTERNAL_SERVER_ERROR;
+        String message = ex.getReason() != null ? ex.getReason() : DEFAULT_JSON_ERROR;
+        return Mono.just(ResponseEntity.status(resolved).body(Map.of(ERROR_MESSAGE, message)));
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
