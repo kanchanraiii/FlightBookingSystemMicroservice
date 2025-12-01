@@ -13,7 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 	            "spring.config.import=optional:classpath:/",
 	            "eureka.client.enabled=false",
 	            "spring.cloud.discovery.enabled=false",
-	            "spring.main.web-application-type=reactive"
+	            "spring.main.web-application-type=reactive",
+	            "spring.cloud.gateway.routes[0].id=dummy",
+	            "spring.cloud.gateway.routes[0].uri=http://example.org",
+	            "spring.cloud.gateway.routes[0].predicates[0]=Path=/dummy/**"
 	    }
 	)
 	class GatewayRouteTest {
