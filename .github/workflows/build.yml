@@ -30,20 +30,20 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Build & test ApiGateway
-        run: mvn -B test -f ApiGateway/pom.xml
-
-      - name: Build & test BookingService
-        run: mvn -B test -f BookingService/pom.xml
-
-      - name: Build & test FlightService
-        run: mvn -B test -f FlightService/pom.xml
+      - name: Build & test Eureka
+        run: mvn -B test -f FlightBookingEurekaServer/pom.xml
 
       - name: Build & test ConfigServer
         run: mvn -B test -f ConfigServerFlightBooking/pom.xml
 
-      - name: Build & test Eureka
-        run: mvn -B test -f FlightBookingEurekaServer/pom.xml
+      - name: Build & test FlightService
+        run: mvn -B test -f FlightService/pom.xml
+
+      - name: Build & test BookingService
+        run: mvn -B test -f BookingService/pom.xml
+
+      - name: Build & test ApiGateway
+        run: mvn -B test -f ApiGateway/pom.xml
 
       - name: SonarQube Scan
         uses: sonarsource/sonarcloud-github-action@v2
