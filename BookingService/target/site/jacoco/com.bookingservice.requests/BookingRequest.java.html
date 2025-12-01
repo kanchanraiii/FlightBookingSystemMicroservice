@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BookingRequest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">BookingService</a> &gt; <a href="index.source.html" class="el_package">com.bookingservice.requests</a> &gt; <span class="el_source">BookingRequest.java</span></div><h1>BookingRequest.java</h1><pre class="source lang-java linenums">package com.bookingservice.requests;
+
+import java.util.List;
+
+import com.bookingservice.model.TripType;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+<span class="fc" id="L12">public class BookingRequest {</span>
+
+    @NotBlank(message = &quot;Contact name is required&quot;)
+    private String contactName;
+
+    @Email(message = &quot;Invalid email format&quot;)
+    @NotBlank(message = &quot;Email is required&quot;)
+    private String contactEmail;
+
+    @NotNull(message = &quot;Trip type is required&quot;)
+    private TripType tripType;
+
+    private String returnFlightId;
+
+    @Valid
+    @NotNull(message = &quot;Passenger list cannot be empty&quot;)
+    private List&lt;PassengerRequest&gt; passengers;
+
+    public String getContactName() {
+<span class="fc" id="L31">        return contactName;</span>
+    }
+    public void setContactName(String contactName) {
+<span class="fc" id="L34">        this.contactName = contactName;</span>
+<span class="fc" id="L35">    }</span>
+
+    public String getContactEmail() {
+<span class="fc" id="L38">        return contactEmail;</span>
+    }
+    public void setContactEmail(String contactEmail) {
+<span class="fc" id="L41">        this.contactEmail = contactEmail;</span>
+<span class="fc" id="L42">    }</span>
+
+    public TripType getTripType() {
+<span class="fc" id="L45">        return tripType;</span>
+    }
+    public void setTripType(TripType tripType) {
+<span class="fc" id="L48">        this.tripType = tripType;</span>
+<span class="fc" id="L49">    }</span>
+
+    public String getReturnFlightId() {
+<span class="fc" id="L52">        return returnFlightId;</span>
+    }
+    public void setReturnFlightId(String returnFlightId) {
+<span class="fc" id="L55">        this.returnFlightId = returnFlightId;</span>
+<span class="fc" id="L56">    }</span>
+
+    public List&lt;PassengerRequest&gt; getPassengers() {
+<span class="fc" id="L59">        return passengers;</span>
+    }
+    public void setPassengers(List&lt;PassengerRequest&gt; passengers) {
+<span class="fc" id="L62">        this.passengers = passengers;</span>
+<span class="fc" id="L63">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BookingService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">BookingService</a> &gt; <a href="index.source.html" class="el_package">com.bookingservice.service</a> &gt; <span class="el_source">BookingService.java</span></div><h1>BookingService.java</h1><pre class="source lang-java linenums">package com.bookingservice.service;
+
+import java.time.Instant;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.bookingservice.client.FlightClient;
+import com.bookingservice.client.FlightDto;
+import com.bookingservice.exceptions.ResourceNotFoundException;
+import com.bookingservice.exceptions.ValidationException;
+import com.bookingservice.model.Booking;
+import com.bookingservice.model.BookingEvent;
+import com.bookingservice.model.BookingEventType;
+import com.bookingservice.model.BookingStatus;
+import com.bookingservice.model.TripType;
+import com.bookingservice.repository.BookingRepository;
+import com.bookingservice.repository.PassengerRepository;
+import com.bookingservice.requests.BookingRequest;
+import com.bookingservice.requests.PassengerRequest;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+@Service
+public class BookingService {
+
+    private final BookingRepository bookingRepository;
+
+    private final PassengerRepository passengerRepository;
+
+    private final FlightClient flightClient;
+
+    private final BookingEventProducer eventProducer;
+
+    private final EmailService emailService;
+
+    @Autowired
+<span class="fc" id="L41">    public BookingService(</span>
+            BookingRepository bookingRepository,
+            PassengerRepository passengerRepository,
+            FlightClient flightClient,
+            BookingEventProducer eventProducer,
+            EmailService emailService) {
+<span class="fc" id="L47">        this.bookingRepository = bookingRepository;</span>
+<span class="fc" id="L48">        this.passengerRepository = passengerRepository;</span>
+<span class="fc" id="L49">        this.flightClient = flightClient;</span>
+<span class="fc" id="L50">        this.eventProducer = eventProducer;</span>
+<span class="fc" id="L51">        this.emailService = emailService;</span>
+<span class="fc" id="L52">    }</span>
+
+   // to book a flight
+    public Mono&lt;Booking&gt; bookFlight(String flightId, BookingRequest req) {
+
+<span class="fc" id="L57">        validatePassengersExist(req);</span>
+<span class="fc" id="L58">        validateTripType(req);</span>
+
+<span class="fc" id="L60">        int count = req.getPassengers().size();</span>
+
+<span class="fc" id="L62">        Mono&lt;FlightDto&gt; outboundMono =</span>
+<span class="fc" id="L63">                flightClient.getFlight(flightId)</span>
+<span class="fc" id="L64">                        .switchIfEmpty(Mono.error(</span>
+<span class="fc" id="L65">                                new ResourceNotFoundException(&quot;Outbound flight not found&quot;)));</span>
+
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (req.getReturnFlightId() == null) {</span>
+<span class="fc" id="L68">            return outboundMono.flatMap(flight -&gt; {</span>
+
+<span class="fc" id="L70">                validateSeats(flight.getAvailableSeats(), count);</span>
+<span class="fc" id="L71">                validatePassengers(req, false);</span>
+
+<span class="fc" id="L73">                return createBooking(req, flightId, null)</span>
+<span class="fc" id="L74">                        .flatMap(saved -&gt;</span>
+<span class="fc" id="L75">                                flightClient.reserveSeats(flightId, count)</span>
+<span class="fc" id="L76">                                        .then(savePassengers(req, saved))</span>
+<span class="fc" id="L77">                                        .then(emitSideEffects(saved, BookingEventType.BOOKED))</span>
+<span class="fc" id="L78">                                        .thenReturn(saved));</span>
+            });
+        }
+
+<span class="fc" id="L82">        Mono&lt;FlightDto&gt; returnMono =</span>
+<span class="fc" id="L83">                flightClient.getFlight(req.getReturnFlightId())</span>
+<span class="fc" id="L84">                        .switchIfEmpty(Mono.error(</span>
+<span class="fc" id="L85">                                new ResourceNotFoundException(&quot;Return flight not found&quot;)));</span>
+
+<span class="fc" id="L87">        return outboundMono.zipWith(returnMono)</span>
+<span class="fc" id="L88">                .flatMap(t -&gt; {</span>
+
+<span class="fc" id="L90">                    validateSeats(t.getT1().getAvailableSeats(), count);</span>
+<span class="fc" id="L91">                    validateSeats(t.getT2().getAvailableSeats(), count);</span>
+
+<span class="fc" id="L93">                    validatePassengers(req, true);</span>
+
+<span class="fc" id="L95">                    return createBooking(req, flightId, req.getReturnFlightId())</span>
+<span class="fc" id="L96">                            .flatMap(saved -&gt;</span>
+<span class="fc" id="L97">                                    flightClient.reserveSeats(flightId, count)</span>
+<span class="fc" id="L98">                                            .then(flightClient.reserveSeats(req.getReturnFlightId(), count))</span>
+<span class="fc" id="L99">                                            .then(savePassengers(req, saved))</span>
+<span class="fc" id="L100">                                            .then(emitSideEffects(saved, BookingEventType.BOOKED))</span>
+<span class="fc" id="L101">                                            .thenReturn(saved));</span>
+                });
+    }
+
+    // to create a booking
+    private Mono&lt;Booking&gt; createBooking(
+            BookingRequest req,
+            String outboundId,
+            String returnId) {
+
+<span class="fc" id="L111">        Booking booking = new Booking();</span>
+<span class="fc" id="L112">        booking.setOutboundFlightId(outboundId);</span>
+<span class="fc" id="L113">        booking.setReturnFlight(returnId);</span>
+<span class="fc" id="L114">        booking.setTripType(req.getTripType());</span>
+<span class="fc" id="L115">        booking.setContactName(req.getContactName());</span>
+<span class="fc" id="L116">        booking.setContactEmail(req.getContactEmail());</span>
+<span class="fc" id="L117">        booking.setTotalPassengers(req.getPassengers().size());</span>
+<span class="fc" id="L118">        booking.setStatus(BookingStatus.CONFIRMED);</span>
+<span class="fc" id="L119">        booking.setPnrOutbound(UUID.randomUUID().toString().substring(0, 6).toUpperCase());</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">        if (returnId != null) {</span>
+<span class="fc" id="L121">            booking.setPnrReturn(UUID.randomUUID().toString().substring(0, 6).toUpperCase());</span>
+        }
+
+<span class="fc" id="L124">        return bookingRepository.save(booking);</span>
+    }
+
+   // to save passengers 
+    private Mono&lt;Void&gt; savePassengers(BookingRequest req, Booking booking) {
+<span class="fc" id="L129">        return passengerRepository</span>
+<span class="fc" id="L130">                .saveAll(Flux.fromIterable(req.getPassengers())</span>
+<span class="pc" id="L131">                        .map(p -&gt; toPassenger(p, booking.getBookingId())))</span>
+<span class="fc" id="L132">                .then();</span>
+    }
+
+    private com.bookingservice.model.Passenger toPassenger(
+            PassengerRequest p, String bookingId) {
+
+<span class="nc" id="L138">        com.bookingservice.model.Passenger passenger =</span>
+<span class="nc" id="L139">                new com.bookingservice.model.Passenger();</span>
+
+<span class="nc" id="L141">        passenger.setName(p.getName());</span>
+<span class="nc" id="L142">        passenger.setAge(p.getAge());</span>
+<span class="nc" id="L143">        passenger.setGender(p.getGender());</span>
+<span class="nc" id="L144">        passenger.setSeatOutbound(p.getSeatOutbound());</span>
+<span class="nc" id="L145">        passenger.setSeatReturn(p.getSeatReturn());</span>
+<span class="nc" id="L146">        passenger.setBookingId(bookingId);</span>
+
+<span class="nc" id="L148">        return passenger;</span>
+    }
+
+    // to get ticket
+    public Mono&lt;Booking&gt; getTicket(String pnr) {
+<span class="fc" id="L153">        return bookingRepository.findByPnrOutbound(pnr)</span>
+<span class="fc" id="L154">                .switchIfEmpty(Mono.error(</span>
+<span class="fc" id="L155">                        new ResourceNotFoundException(&quot;PNR not found&quot;)));</span>
+    }
+
+   // to cancel a booking
+    public Mono&lt;Map&lt;String, String&gt;&gt; cancelTicket(String pnr) {
+
+<span class="fc" id="L161">        return bookingRepository.findByPnrOutbound(pnr)</span>
+<span class="fc" id="L162">                .switchIfEmpty(Mono.error(</span>
+<span class="fc" id="L163">                        new ResourceNotFoundException(&quot;PNR not found&quot;)))</span>
+<span class="fc" id="L164">                .flatMap(booking -&gt; {</span>
+
+<span class="fc bfc" id="L166" title="All 2 branches covered.">                    if (booking.getStatus() == BookingStatus.CANCELLED) {</span>
+<span class="fc" id="L167">                        return Mono.error(</span>
+<span class="fc" id="L168">                                new ValidationException(&quot;Already cancelled&quot;));</span>
+                    }
+
+<span class="fc" id="L171">                    booking.setStatus(BookingStatus.CANCELLED);</span>
+
+<span class="fc" id="L173">                    Mono&lt;Void&gt; releaseOutbound =</span>
+<span class="fc" id="L174">                            flightClient.releaseSeats(</span>
+<span class="fc" id="L175">                                    booking.getOutboundFlightId(),</span>
+<span class="fc" id="L176">                                    booking.getTotalPassengers());</span>
+
+<span class="fc" id="L178">                    Mono&lt;Void&gt; releaseReturn =</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">                            booking.getReturnFlight() == null</span>
+<span class="fc" id="L180">                                    ? Mono.empty()</span>
+<span class="fc" id="L181">                                    : flightClient.releaseSeats(</span>
+<span class="fc" id="L182">                                            booking.getReturnFlight(),</span>
+<span class="fc" id="L183">                                            booking.getTotalPassengers());</span>
+
+<span class="fc" id="L185">                    return bookingRepository.save(booking)</span>
+<span class="fc" id="L186">                            .flatMap(saved -&gt; Mono.when(releaseOutbound, releaseReturn)</span>
+<span class="fc" id="L187">                                    .then(emitSideEffects(saved, BookingEventType.CANCELLED))</span>
+<span class="fc" id="L188">                                    .thenReturn(Map.of(</span>
+<span class="fc" id="L189">                                            &quot;message&quot;, &quot;Booking cancelled&quot;)));</span>
+                });
+    }
+
+    // validations
+    private void validatePassengersExist(BookingRequest req) {
+<span class="pc bpc" id="L195" title="1 of 4 branches missed.">        if (req.getPassengers() == null || req.getPassengers().isEmpty()) {</span>
+<span class="fc" id="L196">            throw new ValidationException(&quot;Passenger required&quot;);</span>
+        }
+<span class="fc" id="L198">    }</span>
+
+    private void validateTripType(BookingRequest req) {
+<span class="fc bfc" id="L201" title="All 2 branches covered.">        if (req.getTripType() == null) {</span>
+<span class="fc" id="L202">            throw new ValidationException(&quot;Trip type required&quot;);</span>
+        }
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        if (req.getTripType() == TripType.ROUND_TRIP</span>
+<span class="fc bfc" id="L205" title="All 2 branches covered.">                &amp;&amp; req.getReturnFlightId() == null) {</span>
+<span class="fc" id="L206">            throw new ValidationException(&quot;Return flight required&quot;);</span>
+        }
+<span class="fc" id="L208">    }</span>
+
+    private void validateSeats(int available, int needed) {
+<span class="fc bfc" id="L211" title="All 2 branches covered.">        if (available &lt; needed) {</span>
+<span class="fc" id="L212">            throw new ValidationException(&quot;Not enough seats&quot;);</span>
+        }
+<span class="fc" id="L214">    }</span>
+
+    private void validatePassengers(BookingRequest req, boolean round) {
+<span class="fc" id="L217">        req.getPassengers().forEach(p -&gt; {</span>
+<span class="fc bfc" id="L218" title="All 2 branches covered.">            if (p.getAge() &lt;= 0) {</span>
+<span class="fc" id="L219">                throw new ValidationException(&quot;Invalid age&quot;);</span>
+            }
+<span class="fc bfc" id="L221" title="All 2 branches covered.">            if (p.getSeatOutbound() == null) {</span>
+<span class="fc" id="L222">                throw new ValidationException(&quot;Outbound seat required&quot;);</span>
+            }
+<span class="fc bfc" id="L224" title="All 4 branches covered.">            if (round &amp;&amp; p.getSeatReturn() == null) {</span>
+<span class="fc" id="L225">                throw new ValidationException(&quot;Return seat required&quot;);</span>
+            }
+<span class="fc" id="L227">        });</span>
+<span class="fc" id="L228">    }</span>
+
+    public Flux&lt;Booking&gt; getHistory(String email) {
+
+<span class="pc bpc" id="L232" title="1 of 4 branches missed.">        if (email == null || email.isBlank()) {</span>
+<span class="fc" id="L233">            return Flux.error(new ValidationException(&quot;Email cannot be empty&quot;));</span>
+        }
+
+<span class="fc" id="L236">        return bookingRepository.findByContactEmail(email);</span>
+    }
+
+    private Mono&lt;Void&gt; emitSideEffects(Booking booking, BookingEventType type) {
+<span class="fc" id="L240">        BookingEvent event = toEvent(booking, type);</span>
+<span class="fc" id="L241">        return Mono.when(</span>
+<span class="fc" id="L242">                        eventProducer.publish(event),</span>
+<span class="fc" id="L243">                        emailService.sendBookingNotification(booking, type)</span>
+                )
+<span class="fc" id="L245">                .onErrorResume(ex -&gt; Mono.empty());</span>
+    }
+
+    private BookingEvent toEvent(Booking booking, BookingEventType type) {
+<span class="fc" id="L249">        BookingEvent event = new BookingEvent();</span>
+<span class="fc" id="L250">        event.setEventType(type);</span>
+<span class="fc" id="L251">        event.setBookingId(booking.getBookingId());</span>
+<span class="fc" id="L252">        event.setPnrOutbound(booking.getPnrOutbound());</span>
+<span class="fc" id="L253">        event.setPnrReturn(booking.getPnrReturn());</span>
+<span class="fc" id="L254">        event.setOutboundFlightId(booking.getOutboundFlightId());</span>
+<span class="fc" id="L255">        event.setReturnFlightId(booking.getReturnFlight());</span>
+<span class="fc" id="L256">        event.setContactName(booking.getContactName());</span>
+<span class="fc" id="L257">        event.setContactEmail(booking.getContactEmail());</span>
+<span class="fc" id="L258">        event.setTotalPassengers(booking.getTotalPassengers());</span>
+<span class="fc" id="L259">        event.setStatus(booking.getStatus());</span>
+<span class="fc" id="L260">        event.setTripType(booking.getTripType());</span>
+<span class="fc" id="L261">        event.setOccurredAt(Instant.now());</span>
+<span class="fc" id="L262">        return event;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

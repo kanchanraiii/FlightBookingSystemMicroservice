@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FlightClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">BookingService</a> &gt; <a href="index.source.html" class="el_package">com.bookingservice.client</a> &gt; <span class="el_source">FlightClient.java</span></div><h1>FlightClient.java</h1><pre class="source lang-java linenums">package com.bookingservice.client;
+
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import reactor.core.publisher.Mono;
+
+@Component
+public class FlightClient {
+
+    private final WebClient webClient;
+    private final CircuitBreaker circuitBreaker;
+
+<span class="fc" id="L17">    public FlightClient(WebClient.Builder builder,</span>
+                        CircuitBreakerRegistry registry) {
+
+<span class="fc" id="L20">        this.webClient = builder</span>
+<span class="fc" id="L21">                .baseUrl(&quot;http://FLIGHT-SERVICE&quot;)</span>
+<span class="fc" id="L22">                .build();</span>
+
+<span class="fc" id="L24">        this.circuitBreaker =</span>
+<span class="fc" id="L25">                registry.circuitBreaker(&quot;flightServiceCB&quot;);</span>
+<span class="fc" id="L26">    }</span>
+
+    public Mono&lt;FlightDto&gt; getFlight(String flightId) {
+<span class="fc" id="L29">        return webClient.get()</span>
+<span class="fc" id="L30">                .uri(&quot;/api/flight/getAllFlights&quot;)</span>
+<span class="fc" id="L31">                .retrieve()</span>
+<span class="fc" id="L32">                .bodyToFlux(FlightDto.class)</span>
+<span class="fc" id="L33">                .filter(f -&gt; flightId.equals(f.getFlightId()))</span>
+<span class="fc" id="L34">                .next()</span>
+<span class="fc" id="L35">                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))</span>
+<span class="fc" id="L36">                .onErrorResume(ex -&gt;</span>
+<span class="fc" id="L37">                        Mono.error(new RuntimeException(&quot;FlightService unavailable&quot;)));</span>
+    }
+
+    public Mono&lt;Void&gt; reserveSeats(String flightId, int seats) {
+<span class="fc" id="L41">        return webClient.post()</span>
+<span class="fc" id="L42">                .uri(&quot;/api/flight/{id}/reserve?seats={s}&quot;, flightId, seats)</span>
+<span class="fc" id="L43">                .retrieve()</span>
+<span class="fc" id="L44">                .bodyToMono(Void.class)</span>
+<span class="fc" id="L45">                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))</span>
+<span class="fc" id="L46">                .onErrorResume(ex -&gt; Mono.error(</span>
+<span class="fc" id="L47">                        new RuntimeException(&quot;Seat reservation failed&quot;)));</span>
+    }
+
+    public Mono&lt;Void&gt; releaseSeats(String flightId, int seats) {
+<span class="fc" id="L51">        return webClient.post()</span>
+<span class="fc" id="L52">                .uri(&quot;/api/flight/{id}/release?seats={s}&quot;, flightId, seats)</span>
+<span class="fc" id="L53">                .retrieve()</span>
+<span class="fc" id="L54">                .bodyToMono(Void.class)</span>
+<span class="fc" id="L55">                .transformDeferred(CircuitBreakerOperator.of(circuitBreaker))</span>
+<span class="fc" id="L56">                .onErrorResume(ex -&gt; Mono.empty());</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
