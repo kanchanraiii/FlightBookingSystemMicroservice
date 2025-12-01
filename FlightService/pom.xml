@@ -142,22 +142,15 @@
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                        <configuration>
-                            <reports>
-                                <xml>true</xml>
-                                <csv>false</csv>
-                                <html>true</html>
-                            </reports>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+                <execution>
+                    <id>report</id>
+                    <phase>test</phase>
+                    <goals>
+                        <goal>report</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
 
           
             <plugin>
