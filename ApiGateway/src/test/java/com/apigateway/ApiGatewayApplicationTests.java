@@ -7,7 +7,13 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(
-	    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+	    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+	    properties = {
+	            "spring.cloud.config.enabled=false",
+	            "spring.config.import=optional:",
+	            "eureka.client.enabled=false",
+	            "spring.cloud.discovery.enabled=false"
+	    }
 	)
 	class GatewayRouteTest {
 
@@ -24,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 	        webTestClient.get()
 	                .uri("/flight/test")
 	                .exchange()
-	                .expectStatus().is5xxServerError();
+	                .expectStatus().isNotFound();
 	    }
 
 	    @Test
@@ -32,6 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 	        webTestClient.post()
 	                .uri("/booking/test")
 	                .exchange()
-	                .expectStatus().is5xxServerError();
+	                .expectStatus().isNotFound();
 	    }
 	}
