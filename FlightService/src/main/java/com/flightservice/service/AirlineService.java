@@ -15,8 +15,12 @@ import reactor.core.publisher.Mono;
 @Service
 public class AirlineService {
     
+    private final AirlineRepository airlineRepository;
+
     @Autowired
-    private AirlineRepository airlineRepository;
+    public AirlineService(AirlineRepository airlineRepository) {
+        this.airlineRepository = airlineRepository;
+    }
 
     // add an airline
     public Mono<Airline> addAirline(AddAirlineRequest req) {

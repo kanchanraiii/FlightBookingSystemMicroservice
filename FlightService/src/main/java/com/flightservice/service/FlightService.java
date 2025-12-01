@@ -21,14 +21,21 @@ import reactor.core.publisher.Mono;
 @Service
 public class FlightService {
 
-    @Autowired
-    private FlightRepository flightInventoryRepository;
+    private final FlightRepository flightInventoryRepository;
+
+    private final AirlineRepository airlineRepository;
+
+    private final SeatsRepository seatRepository;
 
     @Autowired
-    private AirlineRepository airlineRepository;
-
-    @Autowired
-    private SeatsRepository seatRepository;
+    public FlightService(
+            FlightRepository flightInventoryRepository,
+            AirlineRepository airlineRepository,
+            SeatsRepository seatRepository) {
+        this.flightInventoryRepository = flightInventoryRepository;
+        this.airlineRepository = airlineRepository;
+        this.seatRepository = seatRepository;
+    }
 
     // add a flight in db
     public Mono<Map<String, String>> addInventory(AddFlightRequest req) {

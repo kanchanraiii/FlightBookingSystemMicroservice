@@ -15,8 +15,12 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/booking")
 public class MainController {
 
+	private final BookingService bookingService;
+
 	@Autowired
-	private BookingService bookingService;
+	public MainController(BookingService bookingService) {
+		this.bookingService = bookingService;
+	}
 
 	// Book flight
 	@PostMapping("/{flightId}")

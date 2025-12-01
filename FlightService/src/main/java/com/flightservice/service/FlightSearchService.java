@@ -17,8 +17,12 @@ import reactor.core.publisher.Mono;
 @Service
 public class FlightSearchService {
 
+    private final FlightRepository flightInventoryRepository;
+
     @Autowired
-    private FlightRepository flightInventoryRepository;
+    public FlightSearchService(FlightRepository flightInventoryRepository) {
+        this.flightInventoryRepository = flightInventoryRepository;
+    }
 
     // to search a flight 
     public Flux<Flights> searchFlights(SearchFlightRequest req) {

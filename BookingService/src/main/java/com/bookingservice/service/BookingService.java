@@ -27,20 +27,29 @@ import reactor.core.publisher.Mono;
 @Service
 public class BookingService {
 
-    @Autowired
-    private BookingRepository bookingRepository;
+    private final BookingRepository bookingRepository;
+
+    private final PassengerRepository passengerRepository;
+
+    private final FlightClient flightClient;
+
+    private final BookingEventProducer eventProducer;
+
+    private final EmailService emailService;
 
     @Autowired
-    private PassengerRepository passengerRepository;
-
-    @Autowired
-    private FlightClient flightClient;
-
-    @Autowired
-    private BookingEventProducer eventProducer;
-
-    @Autowired
-    private EmailService emailService;
+    public BookingService(
+            BookingRepository bookingRepository,
+            PassengerRepository passengerRepository,
+            FlightClient flightClient,
+            BookingEventProducer eventProducer,
+            EmailService emailService) {
+        this.bookingRepository = bookingRepository;
+        this.passengerRepository = passengerRepository;
+        this.flightClient = flightClient;
+        this.eventProducer = eventProducer;
+        this.emailService = emailService;
+    }
 
    // to book a flight
     public Mono<Booking> bookFlight(String flightId, BookingRequest req) {

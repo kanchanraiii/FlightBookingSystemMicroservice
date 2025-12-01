@@ -28,14 +28,21 @@ import com.flightservice.service.FlightSearchService;
 @RequestMapping("/api/flight")
 public class MainController {
 	
-	 @Autowired
-	 private AirlineService airlineService;
+	 private final AirlineService airlineService;
 	 
-	 @Autowired
-	 private FlightService flightService;
+	 private final FlightService flightService;
 	 
+	 private final FlightSearchService searchService;
+
 	 @Autowired
-	 private FlightSearchService searchService;
+	 public MainController(
+			 AirlineService airlineService,
+			 FlightService flightService,
+			 FlightSearchService searchService) {
+		 this.airlineService = airlineService;
+		 this.flightService = flightService;
+		 this.searchService = searchService;
+	 }
 
 	    // to add an airline
 	    @PostMapping("/addAirline")

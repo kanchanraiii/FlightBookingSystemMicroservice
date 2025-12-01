@@ -13,8 +13,12 @@ import reactor.core.publisher.Mono;
 @Service
 public class TicketService {
 
+    private final BookingRepository bookingRepository;
+
     @Autowired
-    private BookingRepository bookingRepository;
+    public TicketService(BookingRepository bookingRepository) {
+        this.bookingRepository = bookingRepository;
+    }
 
     public Mono<Booking> getTicketByPnr(String pnr) {
 

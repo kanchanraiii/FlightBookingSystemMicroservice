@@ -135,44 +135,6 @@ class ServiceLayerTest {
                 .verifyComplete();
     }
 
-//    @Test
-//    void addFlight_airlineMissing() {
-//        when(airlineRepository.findById("AI")).thenReturn(Mono.empty());
-//        when(flightRepository.findFirstByFlightNumberAndDepartureDate(any(), any()))
-//                .thenReturn(Mono.empty());
-//
-//        StepVerifier.create(flightService.addInventory(addFlightRequest))
-//                .expectError(ResourceNotFoundException.class)
-//                .verify();
-//    }
-
-
-//    @Test
-//    void addFlight_duplicateFlight() {
-//        when(airlineRepository.findById("AI")).thenReturn(Mono.just(new Airline()));
-//        when(flightRepository.findFirstByFlightNumberAndDepartureDate(any(), any()))
-//                .thenReturn(Mono.just(new Flights()));
-//
-//        StepVerifier.create(flightService.addInventory(addFlightRequest))
-//                .expectError(ValidationException.class)
-//                .verify();
-//    }
-
-//    @Test
-//    void addFlight_invalidDates() {
-//        addFlightRequest.setDepartureDate(LocalDate.now().minusDays(1));
-//
-//        when(airlineRepository.findById(eq("AI")))
-//        .thenReturn(Mono.just(new Airline()));
-//
-//        when(flightRepository.findFirstByFlightNumberAndDepartureDate(any(), any()))
-//                .thenReturn(Mono.empty());
-//
-//        StepVerifier.create(flightService.addInventory(addFlightRequest))
-//                .expectError(ValidationException.class)
-//                .verify();
-//    }
-
     @Test
     void getAllFlights() {
         when(flightRepository.findAll()).thenReturn(Flux.just(new Flights()));
