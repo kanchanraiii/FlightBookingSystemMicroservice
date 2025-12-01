@@ -10,9 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 	    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 	    properties = {
 	            "spring.cloud.config.enabled=false",
-	            "spring.config.import=optional:",
+	            "spring.config.import=optional:classpath:/",
 	            "eureka.client.enabled=false",
-	            "spring.cloud.discovery.enabled=false"
+	            "spring.cloud.discovery.enabled=false",
+	            "spring.main.web-application-type=reactive"
 	    }
 	)
 	class GatewayRouteTest {
