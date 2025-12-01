@@ -38,12 +38,12 @@ public class BookingService {
     private final EmailService emailService;
 
     @Autowired
-<span class="fc" id="L41">    public BookingService(</span>
+    public BookingService(
             BookingRepository bookingRepository,
             PassengerRepository passengerRepository,
             FlightClient flightClient,
             BookingEventProducer eventProducer,
-            EmailService emailService) {
+<span class="fc" id="L46">            EmailService emailService) {</span>
 <span class="fc" id="L47">        this.bookingRepository = bookingRepository;</span>
 <span class="fc" id="L48">        this.passengerRepository = passengerRepository;</span>
 <span class="fc" id="L49">        this.flightClient = flightClient;</span>
@@ -62,7 +62,7 @@ public class BookingService {
 <span class="fc" id="L62">        Mono&lt;FlightDto&gt; outboundMono =</span>
 <span class="fc" id="L63">                flightClient.getFlight(flightId)</span>
 <span class="fc" id="L64">                        .switchIfEmpty(Mono.error(</span>
-<span class="fc" id="L65">                                new ResourceNotFoundException(&quot;Outbound flight not found&quot;)));</span>
+                                new ResourceNotFoundException(&quot;Outbound flight not found&quot;)));
 
 <span class="fc bfc" id="L67" title="All 2 branches covered.">        if (req.getReturnFlightId() == null) {</span>
 <span class="fc" id="L68">            return outboundMono.flatMap(flight -&gt; {</span>
@@ -82,7 +82,7 @@ public class BookingService {
 <span class="fc" id="L82">        Mono&lt;FlightDto&gt; returnMono =</span>
 <span class="fc" id="L83">                flightClient.getFlight(req.getReturnFlightId())</span>
 <span class="fc" id="L84">                        .switchIfEmpty(Mono.error(</span>
-<span class="fc" id="L85">                                new ResourceNotFoundException(&quot;Return flight not found&quot;)));</span>
+                                new ResourceNotFoundException(&quot;Return flight not found&quot;)));
 
 <span class="fc" id="L87">        return outboundMono.zipWith(returnMono)</span>
 <span class="fc" id="L88">                .flatMap(t -&gt; {</span>
@@ -136,7 +136,7 @@ public class BookingService {
             PassengerRequest p, String bookingId) {
 
 <span class="nc" id="L138">        com.bookingservice.model.Passenger passenger =</span>
-<span class="nc" id="L139">                new com.bookingservice.model.Passenger();</span>
+                new com.bookingservice.model.Passenger();
 
 <span class="nc" id="L141">        passenger.setName(p.getName());</span>
 <span class="nc" id="L142">        passenger.setAge(p.getAge());</span>
@@ -152,7 +152,7 @@ public class BookingService {
     public Mono&lt;Booking&gt; getTicket(String pnr) {
 <span class="fc" id="L153">        return bookingRepository.findByPnrOutbound(pnr)</span>
 <span class="fc" id="L154">                .switchIfEmpty(Mono.error(</span>
-<span class="fc" id="L155">                        new ResourceNotFoundException(&quot;PNR not found&quot;)));</span>
+                        new ResourceNotFoundException(&quot;PNR not found&quot;)));
     }
 
    // to cancel a booking
@@ -160,12 +160,12 @@ public class BookingService {
 
 <span class="fc" id="L161">        return bookingRepository.findByPnrOutbound(pnr)</span>
 <span class="fc" id="L162">                .switchIfEmpty(Mono.error(</span>
-<span class="fc" id="L163">                        new ResourceNotFoundException(&quot;PNR not found&quot;)))</span>
+                        new ResourceNotFoundException(&quot;PNR not found&quot;)))
 <span class="fc" id="L164">                .flatMap(booking -&gt; {</span>
 
 <span class="fc bfc" id="L166" title="All 2 branches covered.">                    if (booking.getStatus() == BookingStatus.CANCELLED) {</span>
 <span class="fc" id="L167">                        return Mono.error(</span>
-<span class="fc" id="L168">                                new ValidationException(&quot;Already cancelled&quot;));</span>
+                                new ValidationException(&quot;Already cancelled&quot;));
                     }
 
 <span class="fc" id="L171">                    booking.setStatus(BookingStatus.CANCELLED);</span>
@@ -175,7 +175,7 @@ public class BookingService {
 <span class="fc" id="L175">                                    booking.getOutboundFlightId(),</span>
 <span class="fc" id="L176">                                    booking.getTotalPassengers());</span>
 
-<span class="fc" id="L178">                    Mono&lt;Void&gt; releaseReturn =</span>
+                    Mono&lt;Void&gt; releaseReturn =
 <span class="fc bfc" id="L179" title="All 2 branches covered.">                            booking.getReturnFlight() == null</span>
 <span class="fc" id="L180">                                    ? Mono.empty()</span>
 <span class="fc" id="L181">                                    : flightClient.releaseSeats(</span>
@@ -186,7 +186,7 @@ public class BookingService {
 <span class="fc" id="L186">                            .flatMap(saved -&gt; Mono.when(releaseOutbound, releaseReturn)</span>
 <span class="fc" id="L187">                                    .then(emitSideEffects(saved, BookingEventType.CANCELLED))</span>
 <span class="fc" id="L188">                                    .thenReturn(Map.of(</span>
-<span class="fc" id="L189">                                            &quot;message&quot;, &quot;Booking cancelled&quot;)));</span>
+                                            &quot;message&quot;, &quot;Booking cancelled&quot;)));
                 });
     }
 

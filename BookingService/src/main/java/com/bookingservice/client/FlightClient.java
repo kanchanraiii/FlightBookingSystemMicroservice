@@ -50,7 +50,7 @@ public class FlightClient {
                 .onErrorResume(ex -> Mono.error(
                         new ResponseStatusException(
                                 HttpStatus.SERVICE_UNAVAILABLE,
-                                "FlightService unavailable", ex)));
+                                "Seat reservation failed", ex)));
     }
 
     public Mono<Void> releaseSeats(String flightId, int seats) {

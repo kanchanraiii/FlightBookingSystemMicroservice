@@ -7,8 +7,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 
@@ -20,69 +24,82 @@ import com.bookingservice.model.TripType;
 import reactor.core.publisher.Mono;
 
 @RestControllerAdvice
-<span class="fc" id="L23">public class GlobalErrorHandler {</span>
+<span class="fc" id="L27">public class GlobalErrorHandler {</span>
 
     private static final String ERROR_MESSAGE = &quot;error&quot;;
     private static final String DEFAULT_JSON_ERROR = &quot;Invalid JSON request&quot;;
     private static final String DATE_ERROR = &quot;Invalid date format. Use yyyy-MM-dd&quot;;
     private static final String BOOLEAN_ERROR = &quot;Invalid boolean value. Allowed values: true or false&quot;;
-<span class="fc" id="L29">    private static final Map&lt;Class&lt;?&gt;, String&gt; ENUM_ERROR_MESSAGES = Map.of(</span>
-<span class="fc" id="L30">            TripType.class, enumMessage(&quot;trip type&quot;, TripType.values()),</span>
-<span class="fc" id="L31">            Gender.class, enumMessage(&quot;gender&quot;, Gender.values()),</span>
-<span class="fc" id="L32">            Meal.class, enumMessage(&quot;meal type&quot;, Meal.values()),</span>
-<span class="fc" id="L33">            BookingStatus.class, enumMessage(&quot;booking status&quot;, BookingStatus.values())</span>
-<span class="fc" id="L34">    );</span>
+<span class="fc" id="L33">    private static final Map&lt;Class&lt;?&gt;, String&gt; ENUM_ERROR_MESSAGES = Map.of(</span>
+<span class="fc" id="L34">            TripType.class, enumMessage(&quot;trip type&quot;, TripType.values()),</span>
+<span class="fc" id="L35">            Gender.class, enumMessage(&quot;gender&quot;, Gender.values()),</span>
+<span class="fc" id="L36">            Meal.class, enumMessage(&quot;meal type&quot;, Meal.values()),</span>
+<span class="fc" id="L37">            BookingStatus.class, enumMessage(&quot;booking status&quot;, BookingStatus.values())</span>
+    );
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(WebExchangeBindException.class)
     public Mono&lt;Map&lt;String, String&gt;&gt; handleValidationErrors(WebExchangeBindException ex) {
-<span class="fc" id="L38">        Map&lt;String, String&gt; errors = ex.getFieldErrors()</span>
-<span class="fc" id="L39">                .stream()</span>
-<span class="fc" id="L40">                .collect(Collectors.toMap(</span>
-<span class="fc" id="L41">                        fieldError -&gt; fieldError.getField(),</span>
-<span class="fc" id="L42">                        fieldError -&gt; fieldError.getDefaultMessage(),</span>
-<span class="pc" id="L43">                        (first, ignored) -&gt; first,</span>
-<span class="fc" id="L44">                        LinkedHashMap::new));</span>
-<span class="fc" id="L45">        return Mono.just(errors);</span>
+<span class="fc" id="L43">        Map&lt;String, String&gt; errors = ex.getFieldErrors()</span>
+<span class="fc" id="L44">                .stream()</span>
+<span class="fc" id="L45">                .collect(Collectors.toMap(</span>
+<span class="fc" id="L46">                        fieldError -&gt; fieldError.getField(),</span>
+<span class="fc" id="L47">                        fieldError -&gt; fieldError.getDefaultMessage(),</span>
+<span class="nc" id="L48">                        (first, ignored) -&gt; first,</span>
+                        LinkedHashMap::new));
+<span class="fc" id="L50">        return Mono.just(errors);</span>
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ValidationException.class)
     public Mono&lt;Map&lt;String, String&gt;&gt; handleValidationException(ValidationException ex) {
-<span class="fc" id="L50">        return Mono.just(Map.of(ERROR_MESSAGE, ex.getMessage()));</span>
+<span class="fc" id="L56">        return Mono.just(Map.of(ERROR_MESSAGE, ex.getMessage()));</span>
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(ResourceNotFoundException.class)
     public Mono&lt;Map&lt;String, String&gt;&gt; handleNotFound(ResourceNotFoundException ex) {
-<span class="fc" id="L55">        return Mono.just(Map.of(ERROR_MESSAGE, ex.getMessage()));</span>
+<span class="fc" id="L62">        return Mono.just(Map.of(ERROR_MESSAGE, ex.getMessage()));</span>
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public Mono&lt;Map&lt;String, String&gt;&gt; handleInvalidJson(HttpMessageNotReadableException ex) {
-<span class="fc" id="L60">        String message = messageFromCause(ex.getCause());</span>
-<span class="fc" id="L61">        return Mono.just(Map.of(ERROR_MESSAGE, message));</span>
+<span class="fc" id="L68">        String message = messageFromCause(ex.getCause());</span>
+<span class="fc" id="L69">        return Mono.just(Map.of(ERROR_MESSAGE, message));</span>
     }
 
+    @ExceptionHandler(ResponseStatusException.class)
+    public Mono&lt;ResponseEntity&lt;Map&lt;String, String&gt;&gt;&gt; handleResponseStatus(ResponseStatusException ex) {
+<span class="nc" id="L74">        HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        HttpStatus resolved = status != null ? status : HttpStatus.INTERNAL_SERVER_ERROR;</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        String message = ex.getReason() != null ? ex.getReason() : DEFAULT_JSON_ERROR;</span>
+<span class="nc" id="L77">        return Mono.just(ResponseEntity.status(resolved).body(Map.of(ERROR_MESSAGE, message)));</span>
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public Mono&lt;Map&lt;String, String&gt;&gt; handleOthers(Exception ex) {
-<span class="fc" id="L66">        return Mono.just(Map.of(ERROR_MESSAGE, ex.getMessage()));</span>
+<span class="fc" id="L83">        return Mono.just(Map.of(ERROR_MESSAGE, ex.getMessage()));</span>
     }
 
     private String messageFromCause(Throwable cause) {
-<span class="fc bfc" id="L70" title="All 2 branches covered.">        if (cause instanceof com.fasterxml.jackson.databind.exc.InvalidFormatException invalidEx) {</span>
-<span class="fc" id="L71">            return Optional.ofNullable(ENUM_ERROR_MESSAGES.get(invalidEx.getTargetType()))</span>
-<span class="pc bpc" id="L72" title="1 of 2 branches missed.">                    .orElseGet(() -&gt; invalidEx.getTargetType() == Boolean.class</span>
-<span class="fc" id="L73">                            ? BOOLEAN_ERROR</span>
-<span class="pc" id="L74">                            : DEFAULT_JSON_ERROR);</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">        if (cause instanceof com.fasterxml.jackson.databind.exc.InvalidFormatException invalidEx) {</span>
+<span class="fc" id="L88">            return Optional.ofNullable(ENUM_ERROR_MESSAGES.get(invalidEx.getTargetType()))</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">                    .orElseGet(() -&gt; invalidEx.getTargetType() == Boolean.class</span>
+<span class="fc" id="L90">                            ? BOOLEAN_ERROR</span>
+<span class="nc" id="L91">                            : DEFAULT_JSON_ERROR);</span>
         }
 
-<span class="fc bfc" id="L77" title="All 2 branches covered.">        if (cause instanceof DateTimeParseException) {</span>
-<span class="fc" id="L78">            return DATE_ERROR;</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        if (cause instanceof DateTimeParseException) {</span>
+<span class="fc" id="L95">            return DATE_ERROR;</span>
         }
 
-<span class="fc" id="L81">        return DEFAULT_JSON_ERROR;</span>
+<span class="fc" id="L98">        return DEFAULT_JSON_ERROR;</span>
     }
 
     private static String enumMessage(String label, Enum&lt;?&gt;[] values) {
-<span class="fc" id="L85">        return &quot;Invalid &quot; + label + &quot;. Allowed values: &quot; + Arrays.toString(values);</span>
+<span class="fc" id="L102">        return &quot;Invalid &quot; + label + &quot;. Allowed values: &quot; + Arrays.toString(values);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

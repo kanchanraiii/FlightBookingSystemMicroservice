@@ -17,7 +17,7 @@ import reactor.netty.http.client.HttpClient;
     public WebClient.Builder webClientBuilder() {
 <span class="fc" id="L18">        return WebClient.builder()</span>
 <span class="fc" id="L19">                .clientConnector(</span>
-<span class="fc" id="L20">                   new ReactorClientHttpConnector(</span>
+                   new ReactorClientHttpConnector(
 <span class="fc" id="L21">                       HttpClient.create()</span>
 <span class="fc" id="L22">                           .responseTimeout(Duration.ofSeconds(3)))</span>
         );

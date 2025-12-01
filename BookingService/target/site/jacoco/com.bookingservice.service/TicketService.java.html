@@ -38,7 +38,7 @@ public class TicketService {
 <span class="fc" id="L38">                .switchIfEmpty(</span>
 <span class="fc" id="L39">                        bookingRepository.findByPnrReturn(pnr)</span>
 <span class="fc" id="L40">                                .switchIfEmpty(Mono.error(</span>
-<span class="fc" id="L41">                                        new ResourceNotFoundException(&quot;PNR not found&quot;)</span>
+                                        new ResourceNotFoundException(&quot;PNR not found&quot;)
                                 ))
                 );
     }

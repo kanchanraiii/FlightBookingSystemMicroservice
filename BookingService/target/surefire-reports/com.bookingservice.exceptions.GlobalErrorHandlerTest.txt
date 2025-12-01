@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.bookingservice.exceptions.GlobalErrorHandlerTest
 -------------------------------------------------------------------------------
-Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.215 s -- in com.bookingservice.exceptions.GlobalErrorHandlerTest
+Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.138 s -- in com.bookingservice.exceptions.GlobalErrorHandlerTest

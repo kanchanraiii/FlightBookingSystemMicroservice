@@ -10,11 +10,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.bookingservice.client.FlightClient;
 import com.bookingservice.client.FlightDto;
@@ -104,7 +104,11 @@ class FlightClientTest {
                 CircuitBreakerRegistry.ofDefaults());
 
         StepVerifier.create(errorClient.getFlight("ANY"))
-                .verifyErrorMessage("FlightService unavailable");
+                .expectErrorMatches(ex ->
+                        ex instanceof ResponseStatusException rsx
+                                && rsx.getStatusCode().value() == HttpStatus.SERVICE_UNAVAILABLE.value()
+                                && "FlightService unavailable".equals(rsx.getReason()))
+                .verify();
     }
 
     @Test
@@ -114,6 +118,10 @@ class FlightClientTest {
                 CircuitBreakerRegistry.ofDefaults());
 
         StepVerifier.create(errorClient.reserveSeats("F1", 1))
-                .verifyErrorMessage("Seat reservation failed");
+                .expectErrorMatches(ex ->
+                        ex instanceof ResponseStatusException rsx
+                                && rsx.getStatusCode().value() == HttpStatus.SERVICE_UNAVAILABLE.value()
+                                && "Seat reservation failed".equals(rsx.getReason()))
+                .verify();
     }
 }

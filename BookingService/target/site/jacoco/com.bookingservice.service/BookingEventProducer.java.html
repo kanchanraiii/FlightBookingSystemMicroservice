@@ -18,9 +18,9 @@ public class BookingEventProducer {
     private final KafkaTemplate&lt;String, BookingEvent&gt; kafkaTemplate;
     private final String topic;
 
-<span class="fc" id="L21">    public BookingEventProducer(</span>
+    public BookingEventProducer(
             KafkaTemplate&lt;String, BookingEvent&gt; kafkaTemplate,
-            @Value(&quot;${booking.kafka.topic}&quot;) String topic) {
+<span class="fc" id="L23">            @Value(&quot;${booking.kafka.topic}&quot;) String topic) {</span>
 <span class="fc" id="L24">        this.kafkaTemplate = kafkaTemplate;</span>
 <span class="fc" id="L25">        this.topic = topic;</span>
 <span class="fc" id="L26">    }</span>
