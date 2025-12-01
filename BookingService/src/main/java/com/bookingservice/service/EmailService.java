@@ -19,7 +19,6 @@ import reactor.core.publisher.Mono;
 public class EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
-    private static final DateTimeFormatter DATE = DateTimeFormatter.ISO_LOCAL_DATE;
 
     private final JavaMailSender mailSender;
     private final boolean emailEnabled;

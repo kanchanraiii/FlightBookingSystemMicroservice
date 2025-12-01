@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -215,6 +216,25 @@ class BookingServiceTest {
                     assertEquals(ValidationException.class, error.getClass());
                     assertEquals("Not enough seats", error.getMessage());
                 })
+                .verify();
+    }
+
+    @Test
+    void getHistory_blankEmail_returnsValidationError() {
+        StepVerifier.create(bookingService.getHistory(" "))
+                .expectErrorSatisfies(error -> {
+                    assertEquals(ValidationException.class, error.getClass());
+                    assertEquals("Email cannot be empty", error.getMessage());
+                })
+                .verify();
+    }
+
+    @Test
+    void getTicket_notFound_throwsResourceNotFound() {
+        when(bookingRepository.findByPnrOutbound("ABC123")).thenReturn(Mono.empty());
+
+        StepVerifier.create(bookingService.getTicket("ABC123"))
+                .expectError(ResourceNotFoundException.class)
                 .verify();
     }
 

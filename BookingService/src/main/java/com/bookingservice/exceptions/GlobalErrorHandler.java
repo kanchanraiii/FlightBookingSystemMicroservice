@@ -7,8 +7,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 
@@ -33,6 +35,7 @@ public class GlobalErrorHandler {
             BookingStatus.class, enumMessage("booking status", BookingStatus.values())
     );
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(WebExchangeBindException.class)
     public Mono<Map<String, String>> handleValidationErrors(WebExchangeBindException ex) {
         Map<String, String> errors = ex.getFieldErrors()
@@ -45,22 +48,32 @@ public class GlobalErrorHandler {
         return Mono.just(errors);
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ValidationException.class)
     public Mono<Map<String, String>> handleValidationException(ValidationException ex) {
         return Mono.just(Map.of(ERROR_MESSAGE, ex.getMessage()));
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(ResourceNotFoundException.class)
     public Mono<Map<String, String>> handleNotFound(ResourceNotFoundException ex) {
         return Mono.just(Map.of(ERROR_MESSAGE, ex.getMessage()));
     }
 
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public Mono<Map<String, String>> handleServiceUnavailable(ServiceUnavailableException ex) {
+        return Mono.just(Map.of(ERROR_MESSAGE, ex.getMessage()));
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public Mono<Map<String, String>> handleInvalidJson(HttpMessageNotReadableException ex) {
         String message = messageFromCause(ex.getCause());
         return Mono.just(Map.of(ERROR_MESSAGE, message));
     }
 
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public Mono<Map<String, String>> handleOthers(Exception ex) {
         return Mono.just(Map.of(ERROR_MESSAGE, ex.getMessage()));
