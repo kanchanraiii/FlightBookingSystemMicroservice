@@ -15,6 +15,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 	    @Test
 	    void contextLoads() {
+	        // Smoke test: fails if the Spring context or routes cannot start.
 	    }
 
 	    @Test
@@ -32,12 +33,4 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 	                .exchange()
 	                .expectStatus().is5xxServerError();
 	    }
-
-//	    @Test
-//	    void bookingFallbackWorks() {
-//	        webTestClient.get()
-//	                .uri("/fallback/booking")
-//	                .exchange()
-//	                .expectStatus().isOk();
-//	    }
 	}

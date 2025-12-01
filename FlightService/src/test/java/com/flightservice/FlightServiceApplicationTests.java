@@ -8,6 +8,7 @@ class FlightServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// Smoke test: validates that the FlightService Spring context initializes.
 	}
 
 }

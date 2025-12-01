@@ -126,5 +126,6 @@ class GlobalErrorHandlerTest {
 
     @SuppressWarnings("unused")
     private void dummy(String value) {
+        // Intentionally empty: only used to obtain a MethodParameter instance for binding tests.
     }
 }

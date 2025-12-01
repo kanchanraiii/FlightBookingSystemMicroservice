@@ -8,6 +8,7 @@ class ConfigServerFlightBookingApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// Smoke test: verifies the config server context boots successfully.
 	}
 
 }

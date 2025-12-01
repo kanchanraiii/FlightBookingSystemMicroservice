@@ -8,6 +8,7 @@ class BookingServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// Smoke test: ensures the Spring application context starts without issues.
 	}
 
 }
