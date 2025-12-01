@@ -2,8 +2,10 @@ package com.bookingservice.exceptions;
 
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,23 +23,33 @@ import reactor.core.publisher.Mono;
 public class GlobalErrorHandler {
 
     private static final String ERROR_MESSAGE = "error";
+    private static final String DEFAULT_JSON_ERROR = "Invalid JSON request";
+    private static final String DATE_ERROR = "Invalid date format. Use yyyy-MM-dd";
+    private static final String BOOLEAN_ERROR = "Invalid boolean value. Allowed values: true or false";
+    private static final Map<Class<?>, String> ENUM_ERROR_MESSAGES = Map.of(
+            TripType.class, enumMessage("trip type", TripType.values()),
+            Gender.class, enumMessage("gender", Gender.values()),
+            Meal.class, enumMessage("meal type", Meal.values()),
+            BookingStatus.class, enumMessage("booking status", BookingStatus.values())
+    );
 
     @ExceptionHandler(WebExchangeBindException.class)
     public Mono<Map<String, String>> handleValidationErrors(WebExchangeBindException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getFieldErrors().forEach(err ->
-                errors.put(err.getField(), err.getDefaultMessage())
-        );
+        Map<String, String> errors = ex.getFieldErrors()
+                .stream()
+                .collect(Collectors.toMap(
+                        fieldError -> fieldError.getField(),
+                        fieldError -> fieldError.getDefaultMessage(),
+                        (first, ignored) -> first,
+                        LinkedHashMap::new));
         return Mono.just(errors);
     }
 
-    // Custom validation exception
     @ExceptionHandler(ValidationException.class)
     public Mono<Map<String, String>> handleValidationException(ValidationException ex) {
         return Mono.just(Map.of(ERROR_MESSAGE, ex.getMessage()));
     }
 
-    // Resource not found
     @ExceptionHandler(ResourceNotFoundException.class)
     public Mono<Map<String, String>> handleNotFound(ResourceNotFoundException ex) {
         return Mono.just(Map.of(ERROR_MESSAGE, ex.getMessage()));
@@ -45,57 +57,31 @@ public class GlobalErrorHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public Mono<Map<String, String>> handleInvalidJson(HttpMessageNotReadableException ex) {
-
-        Map<String, String> error = new HashMap<>();
-        Throwable cause = ex.getCause();
-
-        if (cause instanceof com.fasterxml.jackson.databind.exc.InvalidFormatException invalidEx) {
-            Class<?> targetType = invalidEx.getTargetType();
-
-            if (targetType == TripType.class) {
-                error.put(ERROR_MESSAGE,
-                        "Invalid trip type. Allowed values: " + Arrays.toString(TripType.values()));
-                return Mono.just(error);
-            }
-
-            if (targetType == Gender.class) {
-                error.put(ERROR_MESSAGE,
-                        "Invalid gender. Allowed values: " + Arrays.toString(Gender.values()));
-                return Mono.just(error);
-            }
-
-            if (targetType == Meal.class) {
-                error.put(ERROR_MESSAGE,
-                        "Invalid meal type. Allowed values: " + Arrays.toString(Meal.values()));
-                return Mono.just(error);
-            }
-
-            if (targetType == BookingStatus.class) {
-                error.put(ERROR_MESSAGE,
-                        "Invalid booking status. Allowed values: "
-                                + Arrays.toString(BookingStatus.values()));
-                return Mono.just(error);
-            }
-
-            if (targetType == Boolean.class) {
-                error.put(ERROR_MESSAGE,
-                        "Invalid boolean value. Allowed values: true or false");
-                return Mono.just(error);
-            }
-        }
-
-        if (cause instanceof DateTimeParseException) {
-            error.put(ERROR_MESSAGE, "Invalid date format. Use yyyy-MM-dd");
-            return Mono.just(error);
-        }
-
-        error.put(ERROR_MESSAGE, "Invalid JSON request");
-        return Mono.just(error);
+        String message = messageFromCause(ex.getCause());
+        return Mono.just(Map.of(ERROR_MESSAGE, message));
     }
 
-    // Fallback for unexpected errors
     @ExceptionHandler(Exception.class)
     public Mono<Map<String, String>> handleOthers(Exception ex) {
         return Mono.just(Map.of(ERROR_MESSAGE, ex.getMessage()));
+    }
+
+    private String messageFromCause(Throwable cause) {
+        if (cause instanceof com.fasterxml.jackson.databind.exc.InvalidFormatException invalidEx) {
+            return Optional.ofNullable(ENUM_ERROR_MESSAGES.get(invalidEx.getTargetType()))
+                    .orElseGet(() -> invalidEx.getTargetType() == Boolean.class
+                            ? BOOLEAN_ERROR
+                            : DEFAULT_JSON_ERROR);
+        }
+
+        if (cause instanceof DateTimeParseException) {
+            return DATE_ERROR;
+        }
+
+        return DEFAULT_JSON_ERROR;
+    }
+
+    private static String enumMessage(String label, Enum<?>[] values) {
+        return "Invalid " + label + ". Allowed values: " + Arrays.toString(values);
     }
 }

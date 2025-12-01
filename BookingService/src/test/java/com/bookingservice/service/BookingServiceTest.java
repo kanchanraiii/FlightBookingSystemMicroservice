@@ -33,6 +33,8 @@ import com.bookingservice.model.Booking;
 import com.bookingservice.model.BookingStatus;
 import com.bookingservice.model.Gender;
 import com.bookingservice.model.TripType;
+import com.bookingservice.service.BookingEventProducer;
+import com.bookingservice.service.EmailService;
 import com.bookingservice.repository.BookingRepository;
 import com.bookingservice.repository.PassengerRepository;
 import com.bookingservice.requests.BookingRequest;
@@ -55,6 +57,12 @@ class BookingServiceTest {
     @Mock
     private FlightClient flightClient;
 
+    @Mock
+    private BookingEventProducer eventProducer;
+
+    @Mock
+    private EmailService emailService;
+
     @InjectMocks
     private BookingService bookingService;
 
@@ -64,6 +72,8 @@ class BookingServiceTest {
     void setUp() {
         bookingIdSequence = new AtomicInteger();
         when(passengerRepository.saveAll(any(Flux.class))).thenReturn(Flux.empty());
+        when(eventProducer.publish(any())).thenReturn(Mono.empty());
+        when(emailService.sendBookingNotification(any(), any())).thenReturn(Mono.empty());
         when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
             Booking toSave = invocation.getArgument(0);
             if (toSave.getBookingId() == null) {
