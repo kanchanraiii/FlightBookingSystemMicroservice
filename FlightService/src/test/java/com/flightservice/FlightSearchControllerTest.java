@@ -13,6 +13,7 @@ import reactor.test.StepVerifier;
 import com.flightservice.controller.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import com.flightservice.controller.MainController;
 
 class FlightSearchControllerTests {
 
@@ -22,7 +23,7 @@ class FlightSearchControllerTests {
     @BeforeEach
     void setup() throws Exception {
         searchService = Mockito.mock(FlightSearchService.class);
-        controller = new MainController();
+        controller = new MainController(null, null, searchService);
         var f = MainController.class.getDeclaredField("searchService");
         f.setAccessible(true);
         f.set(controller, searchService);

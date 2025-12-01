@@ -20,7 +20,7 @@ class AirlineControllerTests {
     @BeforeEach
     void setup() throws Exception {
         airlineService = Mockito.mock(AirlineService.class);
-        controller = new MainController();
+        controller = new MainController(airlineService, null, null);
         var f = MainController.class.getDeclaredField("airlineService");
         f.setAccessible(true);
         f.set(controller, airlineService);
