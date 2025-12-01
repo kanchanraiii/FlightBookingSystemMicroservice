@@ -10,7 +10,7 @@ import com.flightservice.repository.SeatsRepository;
 
 @SpringBootTest(properties = {
         "spring.cloud.config.enabled=false",
-        "spring.config.import=optional:",
+        "spring.config.import=optional:classpath:/",
         "eureka.client.enabled=false",
         "spring.cloud.discovery.enabled=false"
 })
