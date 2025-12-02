@@ -16,11 +16,11 @@ The diagram shows the API Gateway as a single entry point, independent core serv
 
 ## Microservices
 
-- API Gateway - works on 9000 port
-- Flight Service - works on 8090 port
-- Booking Service - works on 8080
-- Config Server - wokrs on 8761 port
-  
+- API Gateway - works on 9000 port  
+- Flight Service - works on 8090 port  
+- Booking Service - works on 8080  
+- Config Server - works on 8761 port  
+
 ### Flight Service
 - Handles all flight related operations such as adding airlines, adding flights, and searching flights.  
 - Implemented using Reactive WebFlux and MongoDB with database name `flight_db`.  
@@ -29,7 +29,7 @@ The diagram shows the API Gateway as a single entry point, independent core serv
 ### Booking Service
 - Manages booking operations including booking a flight, cancelling tickets, fetching booking details by email, and retrieving tickets using PNR.  
 - Implemented using Reactive WebFlux and communicates with Flight Service using OpenFeign.  
-- A Circuit Breaker is applied to handle service failures gracefully.  
+- A Circuit Breaker is applied to handle service failures.  
 - Uses MongoDB with database name `booking_db`.  
 - Unit tested with JaCoCo coverage of 92 percent.
 
@@ -39,30 +39,45 @@ Email sending is asynchronous and decoupled from the booking flow.
 
 ---
 
+## API Gateway Endpoints
+
+All client requests are routed through the API Gateway.
+
+| HTTP Method | Endpoint | Description | Forwarded To |
+|------------|---------|-------------|--------------|
+| GET | `/flights/search` | Search available flights | Flight Service |
+| POST | `/flights` | Add a new flight | Flight Service |
+| POST | `/airlines` | Add airline details | Flight Service |
+| POST | `/bookings` | Book a flight | Booking Service |
+| DELETE | `/bookings/{pnr}` | Cancel ticket using PNR | Booking Service |
+| GET | `/bookings/email/{email}` | Get booking details by email | Booking Service |
+| GET | `/bookings/pnr/{pnr}` | Get ticket details using PNR | Booking Service |
+
+---
+
 ## Supporting Components
-- API Gateway used as a single entry point for all client requests
-- Eureka Server for service discovery
-- Config Server for centralized configuration management
-- Apache Kafka as a message broker for email notifications
-- Proper Validations, Exception Handling has been implemented in each service
+- API Gateway used as a single entry point for all client requests  
+- Eureka Server for service discovery  
+- Config Server for centralized configuration management  
+- Apache Kafka as a message broker for email notifications  
+- Proper validations and exception handling have been implemented in each service  
 
 ---
 
 ## Testing and Code Quality
 
 ### Unit and Load Testing
-- Unit testing completed for core services. Flight Service - 96 % and Booking Service - 92%
-- Overall test coverage is 93.38 percent
-- JMeter load testing performed using CLI with 20, 50, and 100 threads
+- Unit testing completed for core services. Flight Service - 96 percent and Booking Service - 92 percent  
+- Overall test coverage is 93.38 percent  
+- JMeter load testing performed using CLI with 20, 50, and 100 threads  
 
 ### SonarQube Results
-- Zero bugs
-- Zero vulnerabilities
-- Zero code duplications
-- High maintainability rating
+- Zero bugs  
+- Zero vulnerabilities  
+- Zero code duplications  
+- High maintainability rating  
 
-![SonarQube Result 1](After.png)
+![SonarQube Result 1](After.png)  
 ![SonarQube Result 2](After2.png)
 
 ---
-
