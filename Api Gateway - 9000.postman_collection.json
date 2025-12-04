@@ -1,0 +1,264 @@
+{
+	"info": {
+		"_postman_id": "71373aa0-123a-434a-bc2c-17bd1fd21c62",
+		"name": "Api Gateway - 9000",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28036272",
+		"_collection_link": "https://java-dev-5715.postman.co/workspace/Flight-Booking-Microservice~c887dc0e-a518-4a3c-834e-5df3ce130339/collection/28036272-71373aa0-123a-434a-bc2c-17bd1fd21c62?action=share&source=collection_link&creator=28036272"
+	},
+	"item": [
+		{
+			"name": "Add an airline",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"airlineCode\": \"MA\",\n  \"airlineName\": \"Malaysian Airlines\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api-gate-base}}/flight/api/flight/addAirline",
+					"host": [
+						"{{api-gate-base}}"
+					],
+					"path": [
+						"flight",
+						"api",
+						"flight",
+						"addAirline"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Airlines",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9000/api/flight/getAllAirlines",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9000",
+					"path": [
+						"api",
+						"flight",
+						"getAllAirlines"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add a flight",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"airlineCode\": \"MA\",\n  \"flightNumber\": \"AI103\",\n  \"sourceCity\": \"DELHI\",\n  \"destinationCity\": \"MUMBAI\",\n  \"departureDate\": \"2025-12-05\",\n  \"departureTime\": \"10:30\",\n  \"arrivalDate\": \"2025-12-05\",\n  \"arrivalTime\": \"12:45\",\n  \"totalSeats\": 180,\n  \"price\": 5200,\n  \"mealAvailable\": true\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api-gate-base}}/flight/api/flight/airline/inventory/add",
+					"host": [
+						"{{api-gate-base}}"
+					],
+					"path": [
+						"flight",
+						"api",
+						"flight",
+						"airline",
+						"inventory",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All flights",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{api-gate-base}}/flight/api/flight/getAllFlights",
+					"host": [
+						"{{api-gate-base}}"
+					],
+					"path": [
+						"flight",
+						"api",
+						"flight",
+						"getAllFlights"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search Flights",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"sourceCity\": \"DELHI\",\n  \"destinationCity\": \"KOCHI\",\n  \"travelDate\": \"2025-12-06\",\n  \"tripType\": \"ONE_WAY\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api-gate-base}}/flight/api/flight/search",
+					"host": [
+						"{{api-gate-base}}"
+					],
+					"path": [
+						"flight",
+						"api",
+						"flight",
+						"search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Book a flight - ONE WAY",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"tripType\": \"ONE_WAY\",\n  \"contactName\": \"Kanchan\",\n  \"contactEmail\": \"k@example.com\",\n  \"passengers\": [\n    {\n      \"name\": \"Rahul\",\n      \"age\": 26,\n      \"gender\": \"MALE\",\n      \"seatOutbound\": \"S1\"\n    }\n  ]\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9000/booking/api/booking/692c3dd7ccf32cc859067439",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9000",
+					"path": [
+						"booking",
+						"api",
+						"booking",
+						"692c3dd7ccf32cc859067439"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Book a flight - ROUND TRIP",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"tripType\": \"ROUND_TRIP\",\n  \"returnFlightId\": \"RETURN_FLIGHT_ID\",\n  \"contactName\": \"Kanchan\",\n  \"contactEmail\": \"k@example.com\",\n  \"passengers\": [\n    {\n      \"name\": \"Rahul\",\n      \"age\": 26,\n      \"gender\": \"MALE\",\n      \"seatOutbound\": \"S1\",\n      \"seatReturn\": \"S2\"\n    }\n  ]\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{api-gate-base}}/booking/api/booking/692c3dd7ccf32cc859067439",
+					"host": [
+						"{{api-gate-base}}"
+					],
+					"path": [
+						"booking",
+						"api",
+						"booking",
+						"692c3dd7ccf32cc859067439"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get ticket by pnr",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{api-gate-base}}/booking/api/booking/ticket/6ADB70",
+					"host": [
+						"{{api-gate-base}}"
+					],
+					"path": [
+						"booking",
+						"api",
+						"booking",
+						"ticket",
+						"6ADB70"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Booking history by email",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{api-gate-base}}/booking/api/booking/history/kanchan@test.com",
+					"host": [
+						"{{api-gate-base}}"
+					],
+					"path": [
+						"booking",
+						"api",
+						"booking",
+						"history",
+						"kanchan@test.com"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cancel a booking  by pnr",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{api-gate-base}}/booking/api/booking/cancel/6ADB70",
+					"host": [
+						"{{api-gate-base}}"
+					],
+					"path": [
+						"booking",
+						"api",
+						"booking",
+						"cancel",
+						"6ADB70"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -1,0 +1,91 @@
+{
+	"info": {
+		"_postman_id": "6e623a5b-d1c4-45b8-bf87-68393a135c60",
+		"name": "Booking Service - 8080",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28036272",
+		"_collection_link": "https://java-dev-5715.postman.co/workspace/Flight-Booking-Microservice~c887dc0e-a518-4a3c-834e-5df3ce130339/collection/28036272-6e623a5b-d1c4-45b8-bf87-68393a135c60?action=share&source=collection_link&creator=28036272"
+	},
+	"item": [
+		{
+			"name": "Booking Flight - One Way",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"tripType\": \"ONE_WAY\",\n  \"contactName\": \"Kanchan\",\n  \"contactEmail\": \"kanchan@test.com\",\n  \"passengers\": [\n    {\n      \"name\": \"Allen\",\n      \"age\": 25,\n      \"gender\": \"FEMALE\",\n      \"meal\": \"VEG\",\n      \"seatOutbound\": \"S1\"\n    }\n  ]\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{bookingServiceBase}}/692c3dd7ccf32cc859067439",
+					"host": [
+						"{{bookingServiceBase}}"
+					],
+					"path": [
+						"692c3dd7ccf32cc859067439"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get ticket by pnr",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{bookingServiceBase}}/ticket/F33D96",
+					"host": [
+						"{{bookingServiceBase}}"
+					],
+					"path": [
+						"ticket",
+						"F33D96"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get booking history by email",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{bookingServiceBase}}/history/kanchan@test.com",
+					"host": [
+						"{{bookingServiceBase}}"
+					],
+					"path": [
+						"history",
+						"kanchan@test.com"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cancel a booking based on pnr",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{bookingServiceBase}}/cancel/F33D96",
+					"host": [
+						"{{bookingServiceBase}}"
+					],
+					"path": [
+						"cancel",
+						"F33D96"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

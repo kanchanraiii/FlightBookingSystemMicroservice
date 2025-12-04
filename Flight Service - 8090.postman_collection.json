@@ -1,0 +1,139 @@
+{
+	"info": {
+		"_postman_id": "e2da2111-1eba-445c-b672-580955faae67",
+		"name": "Flight Service - 8090",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28036272",
+		"_collection_link": "https://java-dev-5715.postman.co/workspace/Flight-Booking-Microservice~c887dc0e-a518-4a3c-834e-5df3ce130339/collection/28036272-e2da2111-1eba-445c-b672-580955faae67?action=share&source=collection_link&creator=28036272"
+	},
+	"item": [
+		{
+			"name": "Add Airline",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"airlineCode\": \"MA\",\n  \"airlineName\": \"Malaysian Airlines\"\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8090/api/flight/addAirline",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8090",
+					"path": [
+						"api",
+						"flight",
+						"addAirline"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all airlines",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8090/api/flight/getAllAirlines",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8090",
+					"path": [
+						"api",
+						"flight",
+						"getAllAirlines"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get airline by code",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{flightserviceBase}}/getAirline/VIS",
+					"host": [
+						"{{flightserviceBase}}"
+					],
+					"path": [
+						"getAirline",
+						"VIS"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search flight",
+			"request": {
+				"method": "POST",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Add Flight",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"airlineCode\": \"VIS\",\n  \"flightNumber\": \"VIS102\",\n  \"sourceCity\": \"DELHI\",\n  \"destinationCity\": \"KOCHI\",\n  \"departureDate\": \"2025-12-06\",\n  \"departureTime\": \"12:30\",\n  \"arrivalDate\": \"2025-12-06\",\n  \"arrivalTime\": \"13:00\",\n  \"totalSeats\": 180,\n  \"price\": 5200,\n  \"mealAvailable\": true\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{flight-service-base}}/api/flight/airline/inventory/add",
+					"host": [
+						"{{flight-service-base}}"
+					],
+					"path": [
+						"api",
+						"flight",
+						"airline",
+						"inventory",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all flights",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8090/api/flight/getAllFlights",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8090",
+					"path": [
+						"api",
+						"flight",
+						"getAllFlights"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
